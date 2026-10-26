@@ -1,7 +1,7 @@
 {
   "name": "gt-bingo-app-bot",
   "version": "1.0.0",
-  "description": "GT Bingo Telegram Mini App 2026",
+  "description": "GT Bingo 2026 Telegram Mini App",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
