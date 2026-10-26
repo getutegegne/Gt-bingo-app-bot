@@ -1,24 +1,144 @@
+
 <!DOCTYPE html>
 <html lang="am">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GT Bingo 2026</title>
+    <title>ጂቲ ቢንጎ (GT Bingo 2026)</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #0f172a;
-            color: #ffffff;
-            margin-top: 50px;
-        }
-        h1 {
-            color: #38bdf8;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1a2e; color: #fff; text-align: center; margin: 0; padding: 15px; }
+        .header { background: #16213e; padding: 15px; border-radius: 10px; margin-bottom: 15px; font-weight: bold; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .btn { background: #e94560; color: white; border: none; padding: 12px; font-size: 14px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
+        .btn-green { background: #0f3460; }
+        .btn-gold { background: #f39c12; }
+        .card-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-height: 300px; overflow-y: auto; margin-top: 15px; background: #0f3460; padding: 10px; border-radius: 10px; }
+        .card-box { width: 60px; height: 60px; background: #16213e; border: 2px solid #e94560; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; }
+        .card-box.selected { background: #27ae60; border-color: #fff; }
+        .section { display: none; background: #16213e; padding: 15px; border-radius: 10px; margin-top: 15px; }
+        .active { display: block; }
+        input { width: 90%; padding: 10px; margin: 8px 0; border-radius: 5px; border: none; }
     </style>
 </head>
 <body>
-    <h1>🎲 ጂቲ ቢንጎ (GT Bingo 2026)</h1>
-    <p>እንኳን ወደ ጂቲ ቢንጎ ሚኒ አፕ በሰላም መጡ!</p>
+
+    <div class="header">
+        <h2>🎲 ጂቲ ቢንጎ (GT Bingo)</h2>
+        <p>ቀሪ ሂሳብ: <span id="balance" style="color: #f39c12;">0.00 ETB</span></p>
+    </div>
+
+    <!-- ዋና ሜኑ -->
+    <div class="menu-grid">
+        <button class="btn" onclick="showSection('play-section')">🎮 ጨዋታ ጀምር</button>
+        <button class="btn btn-gold" onclick="showSection('stake-section')">ካርቴላ መረጣ (400)</button>
+        <button class="btn btn-green" onclick="showSection('deposit-section')">💳 ዲፖዚት (ቴሌብር)</button>
+        <button class="btn" onclick="showSection('withdraw-section')">🏧 ዊዝድራው</button>
+    </div>
+
+    <!-- የጨዋታ እና የክፍያ ውርርድ (Stake) ክፍል -->
+    <div id="stake-section" class="section">
+        <h3>ካርቴላ እና የውርርድ መጠን ይምረጡ</h3>
+        <p>የአንድ ካርድ ዋጋ ይምረጡ፦</p>
+        <div>
+            <button class="btn btn-gold" style="width: auto; padding: 8px 15px;" onclick="setStake(10)">10 ብር</button>
+            <button class="btn btn-gold" style="width: auto; padding: 8px 15px;" onclick="setStake(50)">50 ብር</button>
+            <button class="btn btn-gold" style="width: auto; padding: 8px 15px;" onclick="setStake(100)">100 ብር</button>
+        </div>
+        <h4>የካርቴላ ቁጥር ይምረጡ (ከ 1 እስከ 400)</h4>
+        <div class="card-container" id="cardContainer">
+            <!-- 400 ካርዶች እዚህ ይፈጠራሉ -->
+        </div>
+    </div>
+
+    <!-- ጨዋታ መጫወቻ ሰሌዳ -->
+    <div id="play-section" class="section active">
+        <h3>የጨዋታ ሰሌዳ</h3>
+        <div id="called-number" style="font-size: 48px; color: #f39c12; margin: 10px 0;">--</div>
+        <button class="btn btn-green" onclick="drawNumber()">ቁጥር ጥራ (Call Number)</button>
+    </div>
+
+    <!-- የቴሌብር ዲፖዚት -->
+    <div id="deposit-section" class="section">
+        <h3>💳 ቴሌብር ዲፖዚት (Deposit)</h3>
+        <p>በቴሌብር ያስገቡት ገንዘብ ለማረጋገጥ መረጃውን ይሙሉ፦</p>
+        <input type="number" id="dep-amount" placeholder="የገንዘብ መጠን (ETB)">
+        <input type="text" id="dep-txid" placeholder="የቴሌብር Transaction ID">
+        <button class="btn btn-green" onclick="submitDeposit()">ዲፖዚት ላክ</button>
+    </div>
+
+    <!-- ዊዝድራው -->
+    <div id="withdraw-section" class="section">
+        <h3>🏧 ገንዘብ ማውጫ (Withdraw)</h3>
+        <input type="number" id="with-amount" placeholder="ማውጣት የሚፈልጉት መጠን">
+        <input type="text" id="with-phone" placeholder="የቴሌብር ስልክ ቁጥር">
+        <button class="btn" onclick="submitWithdraw()">ገንዘብ አውጣ</button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let currentBalance = 0;
+        let selectedStake = 10;
+        let selectedCard = null;
+
+        // 400 ካርቴላዎችን መፍጠር
+        const container = document.getElementById('cardContainer');
+        for (let i = 1; i <= 400; i++) {
+            const card = document.createElement('div');
+            card.className = 'card-box';
+            card.innerText = '#' + i;
+            card.onclick = () => selectCard(card, i);
+            container.appendChild(card);
+        }
+
+        function selectCard(element, number) {
+            document.querySelectorAll('.card-box').forEach(c => c.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedCard = number;
+            alert('ካርቴላ #' + number + ' ተመርጧል!');
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function setStake(amount) {
+            selectedStake = amount;
+            alert('የካርቴላ ዋጋ በ ' + amount + ' ብር ተስተካክሏል!');
+        }
+
+        function drawNumber() {
+            const num = Math.floor(Math.random() * 75) + 1;
+            document.getElementById('called-number').innerText = num;
+            // ድምፅ እንዲጠራ ማድረግ
+            const msg = new SpeechSynthesisUtterance("Number " + num);
+            window.speechSynthesis.speak(msg);
+        }
+
+        function submitDeposit() {
+            const amount = document.getElementById('dep-amount').value;
+            const txid = document.getElementById('dep-txid').value;
+            if(amount && txid) {
+                alert('የዲፖዚት ጥያቄዎ ተልኳል! አድሚኑ ሲያረጋግጥ አካውንትዎ ላይ ይደመራል።');
+                showSection('play-section');
+            } else {
+                alert('እባክዎን ሁሉንም መስኮች ይሙሉ!');
+            }
+        }
+
+        function submitWithdraw() {
+            const amount = document.getElementById('with-amount').value;
+            const phone = document.getElementById('with-phone').value;
+            if(amount && phone) {
+                alert('የውዝድራው ጥያቄዎ ተልኳል!');
+                showSection('play-section');
+            } else {
+                alert('እባክዎን ሁሉንም መስኮች ይሙሉ!');
+            }
+        }
+    </script>
 </body>
 </html>
