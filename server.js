@@ -1,3 +1,4 @@
+
 const { Telegraf, Markup } = require('telegraf');
 const express = require('express');
 const path = require('path');
@@ -7,14 +8,13 @@ const BOT_TOKEN = '8868835776:AAHyTuITByfQFcj7RDpRqLJaR1mhMLpp70I';
 const bot = new Telegraf(BOT_TOKEN);
 
 const app = express();
-// Render የሚሰጠውን ፖርት በራስ-ሰር እንዲቀበል ይደረጋል (ካልሆነም በ 3000 ይሠራል)
+// Render የሚሰጠውን ፖርት በራስ-ሰር እንዲቀበል ይደረጋል
 const PORT = process.env.PORT || 3000;
 
 // የፊት ገጽ (Frontend) ፋይሎች የሚገኙበት የ public ማህደር ማገናኘት
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ሬንደር ላይ ዌብ ሰርቨሩ ሲከፈት የሚሰጠው ቋሚ ሊንክ (Render App URL)
-// (ማስታወሻ፦ ሬንደር ሊንኩን ከሰጠዎት በኋላ እዚህ ጋር የሰጠዎትን ሊንክ ማስገባት ይችላሉ)
+// ሬንደር ላይ ዌብ ሰርቨሩ ሲከፈት የሚሰጠው ቋሚ ሊንክ
 const WEB_APP_URL = process.env.RENDER_EXTERNAL_URL || 'https://gt-bingo-app-bot.onrender.com';
 
 // ቦቱ ሲጀመር የሚሰጠው ምላሽ እና የዌብ አፕ አዝራር
